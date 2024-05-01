@@ -25,7 +25,7 @@ def get_all_type_tree(root_folder, output_folder):
 
 
 if __name__ == '__main__':
-    file_path = "zkevm-circuits/zkevm-circuits/src/evm_circuit/util/math_gadget/constant_division.rs"
+    file_path = "/home/zhongyouwei/ucsb/zkevm-circuits/zkevm-circuits/src/evm_circuit/util/math_gadget/constant_division.rs"
     tree = parse_file(file_path)
     root_node = tree.root_node
     traverse(root_node, find_calls)

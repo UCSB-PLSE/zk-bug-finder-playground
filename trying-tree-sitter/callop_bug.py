@@ -25,7 +25,7 @@ def traverse_function(node, result):
 
 
 if __name__ == '__main__':
-    file_path = "/Users/tangken/Desktop/ucsb/web3/zkevm-circuits/zkevm-circuits/src/evm_circuit/execution/callop.rs"
+    file_path = "/home/zhongyouwei/ucsb/zkevm-circuits/zkevm-circuits/src/evm_circuit/execution/callop.rs"
     tree = parse_file(file_path)
     root_node = tree.root_node
     fun_list = []
