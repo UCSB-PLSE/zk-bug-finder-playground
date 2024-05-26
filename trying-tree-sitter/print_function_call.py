@@ -1,5 +1,6 @@
-import os
+
 from utils import parse_file, process_project_folder
+
 
 
 def traverse(node, callback, caller=None, line_offset=0):

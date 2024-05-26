@@ -47,7 +47,7 @@ def write_tree(output_file, node, depth=0):
     start_row, start_col = node.start_point
     end_row, end_col = node.end_point
     with open(output_file, 'a') as file:
-        file.write('  ' * depth + f'{node.type} ({start_row}, {start_col}) - ({end_row}, {end_col}):\n')
+        file.write('  ' * depth + f'{node.type}: {node.text} ({start_row}, {start_col}) - ({end_row}, {end_col}):\n')
     for i in range(node.child_count):
         write_tree(output_file, node.child(i), depth + 1)
 
