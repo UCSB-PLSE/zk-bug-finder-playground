@@ -1,0 +1,11 @@
+[package]
+name = "halo2-examples"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "addition"
+path = "src/addition.rs"
+
+[dependencies]
+halo2_proofs = { git = "https://github.com/scroll-tech/halo2.git", tag = "v0.4.0" }
