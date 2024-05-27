@@ -1,12 +1,11 @@
 use std::marker::PhantomData;
-use halo2_proofs::circuit::Value;
 use halo2_proofs::{
     arithmetic::FieldExt,
-    circuit::{Chip, Layouter, SimpleFloorPlanner},
+    circuit::{Chip, Layouter, SimpleFloorPlanner, Value},
     plonk::{Advice, Circuit, Column, ConstraintSystem, Error, Instance},
     poly::Rotation,
+    plonk::Selector,
 };
-use halo2_proofs::plonk::Selector;
 
 // specify necessary columns in the main table
 #[derive(Clone, Debug)]
@@ -89,7 +88,7 @@ impl<Field: FieldExt> Circuit<Field> for MyCircuit<Field> {
     ) -> Result<(), Error> {
         let res = self.u + self.v;
 
-        let (x_a1, x_b1, x_c1) = layouter.assign_region(
+        let (_x_a1, _x_b1, x_c1) = layouter.assign_region(
             || "addition region",
             |mut region| {
                 config.s_add.enable(&mut region, 0)?;
@@ -105,7 +104,7 @@ impl<Field: FieldExt> Circuit<Field> for MyCircuit<Field> {
         )?;
 
         layouter.constrain_instance(x_c1.cell(), config.instance, 0)?;
-        println!("{:?} + {:?} = {:?}", x_a1.value(), x_b1.value(), x_c1.value());
+        println!("Res = {:?}", x_c1.value());
         
         Ok(())
     }
@@ -124,8 +123,6 @@ fn main() {
         v: Value::known(v),
     };
 
-    // the number of rows cannot exceed 2^k
-    let k = 4;
-    let prover = MockProver::run(k, &circuit, vec![vec![res]]).unwrap();
-    assert_eq!(prover.verify(), Ok(()));
+    let prover = MockProver::run(4, &circuit, vec![vec![res]]).unwrap();
+    prover.assert_satisfied();
 }

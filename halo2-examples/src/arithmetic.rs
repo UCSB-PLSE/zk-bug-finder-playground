@@ -1,13 +1,11 @@
-use std::env;
 use std::marker::PhantomData;
-use halo2_proofs::circuit::Value;
 use halo2_proofs::{
     arithmetic::FieldExt,
-    circuit::{Chip, Layouter, SimpleFloorPlanner},
+    circuit::{Chip, Layouter, SimpleFloorPlanner, Value},
     plonk::{Advice, Circuit, Column, ConstraintSystem, Error, Fixed, Instance},
     poly::Rotation,
+    plonk::Selector,
 };
-use halo2_proofs::plonk::Selector;
 
 // specify necessary columns in the main table
 #[derive(Clone, Debug)]
@@ -174,9 +172,9 @@ impl<Field: FieldExt> Circuit<Field> for MyCircuit<Field> {
                     config.advice[2].clone(), 2, || t3)?;
 
                 Ok((
-                    (x_a1.cell(), x_b1.cell(), x_c1.cell()),
-                    (x_a2.cell(), x_b2.cell(), x_c2.cell()),
-                    (x_a3.cell(), x_c3.cell())
+                    (x_a1, x_b1, x_c1),
+                    (x_a2, x_b2, x_c2),
+                    (x_a3, x_c3)
                 ))
             }
         )?;
@@ -220,42 +218,37 @@ impl<Field: FieldExt> Circuit<Field> for MyCircuit<Field> {
                 let x_c6 = region.assign_advice(|| "x_c6",
                     config.advice[2].clone(), 2, || t6)?;
                 Ok((
-                    (x_a4.cell(), x_b4.cell(), x_c4.cell()),
-                    (x_a5.cell(), x_b5.cell(), x_c5.cell()),
-                    (x_a6.cell(), x_c6.cell())
+                    (x_a4, x_b4, x_c4),
+                    (x_a5, x_b5, x_c5),
+                    (x_a6, x_c6)
                 ))
             }
         )?;
 
         // t6 is result, assign instance
-        layouter.constrain_instance(x_c6, config.instance, 0)?;
+        layouter.constrain_instance(x_c6.cell(), config.instance, 0)?;
 
         // enforce copy constraints
         layouter.assign_region(|| "equality",
             |mut region| {
-                region.constrain_equal(x_a1, x_a2)?; // namely, x_a1 = x_a2
-                region.constrain_equal(x_a2, x_b1)?; // namely, x_a2 = x_b1
-
-                region.constrain_equal(x_b2, x_b5)?; // namely, x_b2 = x_b5
-
-                region.constrain_equal(x_a4, x_c1)?; // namely, x_a4 = x_c1
-
-                region.constrain_equal(x_a3, x_c2)?; // namely, x_a3 = x_c2
-
-                region.constrain_equal(x_b4, x_c3)?; // namely, x_b4 = x_c3
-
-                region.constrain_equal(x_a5, x_c4)?; // namely, x_a5 = x_c4
-
-                region.constrain_equal(x_a6, x_c5)?; // namely, x_a6 = x_c5
+                region.constrain_equal(x_a1.cell(), x_a2.cell())?; // namely, x_a1 = x_a2
+                region.constrain_equal(x_a2.cell(), x_b1.cell())?; // namely, x_a2 = x_b1
+                region.constrain_equal(x_b2.cell(), x_b5.cell())?; // namely, x_b2 = x_b5
+                region.constrain_equal(x_a4.cell(), x_c1.cell())?; // namely, x_a4 = x_c1
+                region.constrain_equal(x_a3.cell(), x_c2.cell())?; // namely, x_a3 = x_c2
+                region.constrain_equal(x_b4.cell(), x_c3.cell())?; // namely, x_b4 = x_c3
+                region.constrain_equal(x_a5.cell(), x_c4.cell())?; // namely, x_a5 = x_c4
+                region.constrain_equal(x_a6.cell(), x_c5.cell())?; // namely, x_a6 = x_c5
                 Ok(())
             }
         )?;
+
+        println!("Res = {:?}", x_c6.value());
         Ok(())
     }
 }
 
 fn main() {
-    env::set_var("RUST_BACKTRACE", "full");
     use halo2_proofs::dev::MockProver;
     use halo2_proofs::halo2curves::bn256::Fr as Fp;
 
@@ -268,9 +261,6 @@ fn main() {
         v: Value::known(v),
     };
 
-    // the number of rows cannot exceed 2^k
-    let k = 4;
-    let prover = MockProver::run(k, &circuit, vec![vec![res]]).unwrap();
-    assert_eq!(prover.verify(), Ok(()));
-    println!("Ok");
+    let prover = MockProver::run(4, &circuit, vec![vec![res]]).unwrap();
+    prover.assert_satisfied();
 }
