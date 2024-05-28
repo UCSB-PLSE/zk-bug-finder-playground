@@ -15,5 +15,9 @@ name = "arithmetic"
 path = "src/arithmetic.rs"
 
 [[bin]]
+name = "iszero"
+path = "src/iszero.rs"
+
+[[bin]]
 name = "ite"
 path = "src/ite.rs"

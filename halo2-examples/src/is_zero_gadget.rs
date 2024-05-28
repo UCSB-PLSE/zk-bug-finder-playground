@@ -1,4 +1,13 @@
-use halo2_proofs::{arithmetic::FieldExt, circuit::*, plonk::*, poly::Rotation};
+// Given a `value` to be checked if it is zero:
+//  - witnesses `inv0(value)`, where `inv0(x)` is 0 when `x` = 0, and
+//  `1/x` otherwise
+
+use halo2_proofs::{
+    arithmetic::FieldExt,
+    circuit::{AssignedCell, Chip, Value, Region},
+    plonk::{Advice, Column, ConstraintSystem, Expression, Error, VirtualCells},
+    poly::Rotation,
+};
 
 #[derive(Clone, Debug)]
 pub struct IsZeroConfig<F> {
@@ -59,9 +68,22 @@ impl<F: FieldExt> IsZeroChip<F> {
         region: &mut Region<'_, F>,
         offset: usize,
         value: Value<F>,
-    ) -> Result<(), Error> {
+    ) -> Result<AssignedCell<F, F>, Error> {
         let value_inv = value.map(|value| value.invert().unwrap_or(F::zero()));
-        region.assign_advice(|| "value inv", self.config.value_inv, offset, || value_inv)?;
-        Ok(())
+        let res = region.assign_advice(|| "value inv", self.config.value_inv, offset, || value_inv)?;
+        Ok(res)
+    }
+}
+
+impl<F: FieldExt> Chip<F> for IsZeroChip<F> {
+    type Config = IsZeroConfig<F>;
+    type Loaded = ();
+
+    fn config(&self) -> &Self::Config {
+        &self.config
+    }
+
+    fn loaded(&self) -> &Self::Loaded {
+        &()
     }
 }
