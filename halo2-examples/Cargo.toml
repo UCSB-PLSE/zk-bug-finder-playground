@@ -21,3 +21,7 @@ path = "src/iszero.rs"
 [[bin]]
 name = "ite"
 path = "src/ite.rs"
+
+[[bin]]
+name = "range"
+path = "src/range.rs"

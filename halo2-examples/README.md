@@ -11,3 +11,5 @@ Super simple example programs demonstrating basic halo2 arithmetic operations.
 - `iszero`: Computes `f(v) = if v == 0 then 0 else {1 / v}`
 - `ite`: Computes `f(a, b, c) = if a == b then {c} else {a - b}`
     - Adapted from: https://github.com/enricobottazzi/halo2-intro/tree/master
+- `range`: Check whether given input `v < 8`. Contains a negative test `v = 8` that fail the constraint
+    - Adapted from: https://github.com/enricobottazzi/halo2-intro/tree/master
